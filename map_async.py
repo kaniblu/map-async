@@ -1,5 +1,5 @@
-__all__ = ["map_async"]
-__version__ = "1.0.1"
+__all__ = ["map_async", "starmap_async"]
+__version__ = "1.1"
 
 import importlib
 import itertools
@@ -89,7 +89,7 @@ def chunkize(corpus, chunksize, maxsize=0):
 
 
 def map_async(func, iterable, processes=None, scale=10, show_progress=False,
-              desc=None):
+              desc=None, starmap=False):
     """
     Apply function `func` on all items in an iterable with multiple processes.
 
@@ -114,6 +114,7 @@ def map_async(func, iterable, processes=None, scale=10, show_progress=False,
       show_progress: (bool) if enabled, a `tqdm` progress bar will be displayed
         (run `pip install tqdm` if not installed)
       desc: (str, optional) description to be displayed on the progress bar.
+      starmap: (bool) whether to use `starmap` instead of `map`.
 
     Returns:
       A list of transformed items (as long as the input iterable)
@@ -131,13 +132,18 @@ def map_async(func, iterable, processes=None, scale=10, show_progress=False,
         processes = multiprocessing.cpu_count()
     chunks = list(chunkize(iterable, processes * scale))
     pool = mp.Pool(processes)
+    map_func = pool.map if not starmap else pool.starmap
     ret = []
     progress = None
     if show_progress:
         tqdm = importlib.import_module("tqdm")
         progress = tqdm.tqdm(chunks, desc=desc)
     for chunk in chunks:
-        ret.extend(pool.map(func, chunk))
+        ret.extend(map_func(func, chunk))
         if progress is not None:
             progress.update(1)
     return ret
+
+
+def starmap_async(*args, **kwargs):
+    return map_async(*args, starmap=True, **kwargs)

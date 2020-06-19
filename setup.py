@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="map_async",
-    version="1.0.1",
+    version="1.1",
     license="MIT",
     description="Multiprocess mapping with a integrated progress bar.",
     author='Kang Min Yoo',
