@@ -41,20 +41,14 @@ class InputQueue(multiprocessing.Process):
         while True:
             chunk = itertools.islice(it, self.chunksize)
             wrapped_chunk = [list(chunk)]
-
             if not wrapped_chunk[0]:
                 self.q.put(None, block=True)
                 break
-
-            try:
-                qsize = self.q.qsize()
-            except NotImplementedError:
-                qsize = '?'
             self.q.put(wrapped_chunk.pop(), block=True)
 
 
 # gensim.utils.chunkize
-def chunkize(corpus, chunksize, maxsize=0):
+def chunkize(corpus, chunksize, maxsize=None):
     """
     Split a stream of values into smaller chunks.
     Each chunk is of length `chunksize`, except the last one which may be smaller.
@@ -74,7 +68,7 @@ def chunkize(corpus, chunksize, maxsize=0):
     """
     assert chunksize > 0
 
-    if maxsize > 0:
+    if maxsize is not None:
         q = multiprocessing.Queue(maxsize=maxsize)
         worker = InputQueue(q, corpus, chunksize, maxsize=maxsize)
         worker.daemon = True
