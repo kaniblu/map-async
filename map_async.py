@@ -1,5 +1,5 @@
 __all__ = ["map_async", "starmap_async"]
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 import importlib
 import itertools
