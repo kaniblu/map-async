@@ -15,7 +15,8 @@ def test_basic():
             list(map_async.map_async(square, range(10), show_progress=True)))
     it1, it2 = itertools.tee((i for i in range(20, 50, 3)), 2)
     assert (list(map(square, it1)) ==
-            list(map_async.map_async(square, it2, show_progress=True)))
+            list(map_async.map_async(square, it2, show_progress=True,
+                                     tqdm_kwargs=dict(unit="items", total=10))))
 
 
 def test_starmap():

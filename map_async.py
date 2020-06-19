@@ -1,5 +1,5 @@
 __all__ = ["map_async", "starmap_async"]
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 
 import importlib
 import itertools
@@ -84,7 +84,8 @@ def chunkize(corpus, chunksize, maxsize=None):
 
 
 def map_async(func, iterable: Iterable, processes=None, scale=10,
-              show_progress=False, desc=None, starmap=False) -> Iterable:
+              show_progress=False, starmap=False, desc=None,
+              tqdm_kwargs=None) -> Iterable:
     """
     Apply function `func` on all items in an iterable with multiple processes.
 
@@ -109,6 +110,7 @@ def map_async(func, iterable: Iterable, processes=None, scale=10,
       show_progress: (bool) if enabled, a `tqdm` progress bar will be displayed
         (run `pip install tqdm` if not installed)
       desc: (str, optional) description to be displayed on the progress bar.
+      tqdm_kwargs: (dict, optional) tqdm options.
       starmap: (bool) whether to use `starmap` instead of `map`.
 
     Returns:
@@ -131,8 +133,13 @@ def map_async(func, iterable: Iterable, processes=None, scale=10,
     map_func = pool.map if not starmap else pool.starmap
     progress = None
     if show_progress:
+        tqdm_kwargs = tqdm_kwargs or dict()
+        post_kwargs = {"desc": desc, "total": size}
+        for k, v in post_kwargs.items():
+            if k not in tqdm_kwargs:
+                tqdm_kwargs[k] = v
         tqdm = importlib.import_module("tqdm")
-        progress = tqdm.tqdm(chunks, desc=desc, total=size)
+        progress = tqdm.tqdm(chunks, **tqdm_kwargs)
     for chunk in chunks:
         items = map_func(func, chunk)
         if progress is not None:
