@@ -1,11 +1,11 @@
 __all__ = ["map_async", "starmap_async"]
-__version__ = "1.2"
+__version__ = "1.2.1"
 
 import importlib
 import itertools
 import multiprocessing
 import multiprocessing.pool as mp
-from typing import Sized
+from typing import Sized, Iterable
 
 
 # gensim.utils.chunkize_serial
@@ -89,8 +89,8 @@ def chunkize(corpus, chunksize, maxsize=0):
             yield chunk
 
 
-def map_async(func, iterable, processes=None, scale=10, show_progress=False,
-              desc=None, starmap=False):
+def map_async(func, iterable: Iterable, processes=None, scale=10,
+              show_progress=False, desc=None, starmap=False) -> Iterable:
     """
     Apply function `func` on all items in an iterable with multiple processes.
 
@@ -118,7 +118,7 @@ def map_async(func, iterable, processes=None, scale=10, show_progress=False,
       starmap: (bool) whether to use `starmap` instead of `map`.
 
     Returns:
-      A list of transformed items (as long as the input iterable)
+      Iterable containing mapped items
 
     Example:
       >>> from map_async import map_async
@@ -135,17 +135,15 @@ def map_async(func, iterable, processes=None, scale=10, show_progress=False,
     chunks = chunkize(iterable, processes * scale, maxsize=size)
     pool = mp.Pool(processes)
     map_func = pool.map if not starmap else pool.starmap
-    ret = []
     progress = None
     if show_progress:
         tqdm = importlib.import_module("tqdm")
         progress = tqdm.tqdm(chunks, desc=desc, total=size)
     for chunk in chunks:
         items = map_func(func, chunk)
-        ret.extend(items)
         if progress is not None:
             progress.update(len(items))
-    return ret
+        yield from items
 
 
 def starmap_async(*args, **kwargs):
