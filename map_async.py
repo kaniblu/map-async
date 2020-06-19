@@ -1,10 +1,11 @@
 __all__ = ["map_async", "starmap_async"]
-__version__ = "1.1"
+__version__ = "1.2"
 
 import importlib
 import itertools
 import multiprocessing
 import multiprocessing.pool as mp
+from typing import Sized
 
 
 # gensim.utils.chunkize_serial
@@ -130,18 +131,20 @@ def map_async(func, iterable, processes=None, scale=10, show_progress=False,
     """
     if processes is None:
         processes = multiprocessing.cpu_count()
-    chunks = list(chunkize(iterable, processes * scale))
+    size = len(iterable) if isinstance(iterable, Sized) else None
+    chunks = chunkize(iterable, processes * scale, maxsize=size)
     pool = mp.Pool(processes)
     map_func = pool.map if not starmap else pool.starmap
     ret = []
     progress = None
     if show_progress:
         tqdm = importlib.import_module("tqdm")
-        progress = tqdm.tqdm(chunks, desc=desc)
+        progress = tqdm.tqdm(chunks, desc=desc, total=size)
     for chunk in chunks:
-        ret.extend(map_func(func, chunk))
+        items = map_func(func, chunk)
+        ret.extend(items)
         if progress is not None:
-            progress.update(1)
+            progress.update(len(items))
     return ret
 
 
