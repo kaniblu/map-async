@@ -1,5 +1,5 @@
 __all__ = ["map_async"]
-__version__ = "1.0"
+__version__ = "1.0.1"
 
 import importlib
 import itertools

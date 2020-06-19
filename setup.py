@@ -3,13 +3,13 @@ import setuptools
 
 setuptools.setup(
     name="map_async",
-    version="1.0",
+    version="1.0.1",
     license="MIT",
     description="Multiprocess mapping with a integrated progress bar.",
     author='Kang Min Yoo',
     author_email='kangmin.yoo@gmail.com',
     url='https://github.com/kaniblu/map-async',
-    packages=setuptools.find_packages(),
+    py_modules=["map_async"],
     classifiers=[
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
